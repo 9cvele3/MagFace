@@ -3,7 +3,7 @@ This is a fork of MagFace with the utility script (`convert_to_onnx.py`) to conv
 
 Download some model from the ModelZoo bellow.
 
-All the pth files are above 200MB (even the ones behind BaiduDrive).
+All the pth files are above 200MB (even the ones on BaiduDrive).
 
 How to run the script:
 
@@ -18,6 +18,10 @@ python convert_to_onnx.py # this will search for magface_iresnet18_casia_dp.pth 
 The resulting onnx file is smaller in size than the original pth file (92MB compared to 225MB).
 
 You can open the resulting onnx file in https://netron.app/ and examine the network structure.
+
+You can validate the model with MicrosoftMLRunner: ```MicrosoftMLRunner.exe -model D:\MagFace-files\magface_iresnet18_casia_dp.pth.onnx -GPU -Input D:\MagFace-files\13.jpg -TopK 10```
+
+TODO: batch size, fp16 support
 
 # MagFace
 MagFace: A Universal Representation for Face Recognition and Quality Assessment
