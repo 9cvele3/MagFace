@@ -9,10 +9,11 @@ jupyterlab
 notebook
 seaborn
 Pillow==6.2.2
-matplotlib 
+matplotlib
 loguru
 six
 imageio
 scikit-image
 tqdm
-sklearn
+scikit-learn
+onnx

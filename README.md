@@ -1,5 +1,26 @@
+# MagFace ONNX
+This is a fork of MagFace with the utility script (`convert_to_onnx.py`) to convert the models to onnx format.
+
+Download some model from the ModelZoo bellow.
+
+All the pth files are above 200MB (even the ones behind BaiduDrive).
+
+How to run the script:
+
+```
+conda create --name magface python=3.10
+conda activate magface
+pip install -r raw/requirements.txt
+python convert_to_onnx.py # this will search for magface_iresnet18_casia_dp.pth by default, change if needed
+# This will output magface_iresnet18_casia_dp.pth.onnx file
+```
+
+The resulting onnx file is smaller in size than the original pth file (92MB compared to 225MB).
+
+You can open the resulting onnx file in https://netron.app/ and examine the network structure.
+
 # MagFace
-MagFace: A Universal Representation for Face Recognition and Quality Assessment  
+MagFace: A Universal Representation for Face Recognition and Quality Assessment
 in *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 2021, **Oral** presentation.
 
 ![magface](raw/magface.png)
@@ -16,11 +37,11 @@ in *IEEE Conference on Computer Vision and Pattern Recognition (CVPR)*, 2021, **
 
 **Beamer**: [GoogleDrive](https://drive.google.com/file/d/1MPj_ghD7c1igA_fe20ooMbOcD-OsK0jC/view?usp=sharing), [BaiduDrive](https://pan.baidu.com/s/1wt9eqCbn6forcoAz1ZVrAw), code: c16b
 
-**Presentation**: 
+**Presentation**:
   1. CVPR [5-minute presentation](https://www.bilibili.com/video/BV1Jq4y1j7ZH).
   2. Will release a detailed version later.
 
-**NOTE**: The original codes are implemented on a private codebase and will not be released. 
+**NOTE**: The original codes are implemented on a private codebase and will not be released.
 **This repo is an official but abridged version.** See todo list for plans.
 
 ## BibTex
@@ -60,10 +81,10 @@ Use `eval_ijb.sh` for evaluation on IJB-B ([Gdrive](https://drive.google.com/fil
 ### Quality Assessment
 Steps to calculate face qualities ([examples.ipynb](inference/examples.ipynb) is a toy example).
 
-1. extract features from faces with `inference/gen_feat.py`. 
-2. calculate feature magnitudes with `np.linalg.norm()`. 
+1. extract features from faces with `inference/gen_feat.py`.
+2. calculate feature magnitudes with `np.linalg.norm()`.
 
-Plot the error-versus-reject curve: 
+Plot the error-versus-reject curve:
 
 1. prepare the features (in the recognition step).
 2. `cd eva/eval_quality` and run `eval_quality.sh` (e.g., `./eval_quality.sh  lfw`).
@@ -82,10 +103,10 @@ Use [`rec2image.py`](https://github.com/deepinsight/insightface/blob/0b5cab57b60
 ## Parallel Training
 **Note:** Use **Pytorch > 1.7** for this feature. Codes are mainly based on [torchshard](https://github.com/KaiyuYue/torchshard) from [Kaiyu Yue](http://kaiyuyue.com/).
 
-How to run: 
+How to run:
 
 1. Update NCCL info (can be found with the command `ifconfig`) and port info in [train_dist.py](run/train_dist.py#L290-292)
-2. Set the number of gpus in [here](run/train_dist.py#L283). 
+2. Set the number of gpus in [here](run/train_dist.py#L283).
 3. [Optional. Not tested yet!] If training with multi-machines, modify [node number](run/train_dist.py#L284).
 4. [Optional. **Help needed** as NAN can be reached during training.] Enable fp16 training by setiing `--fp16 1` in run/run_dist.sh.
 5. run run/run_dist.sh.
@@ -93,7 +114,7 @@ How to run:
 
 Parallel training (Sec. 5.1 in [ArcFace](https://arxiv.org/pdf/1801.07698v3.pdf)) can highly speed up training as well as reduce consumption of GPU memory. Here are some results.
 
-| Parallel Method | Float Type | Backbone | GPU | Batch Size | FC Size | Split FC? | Avg. Throughput (images/sec) | Memory (MiB) | 
+| Parallel Method | Float Type | Backbone | GPU | Batch Size | FC Size | Split FC? | Avg. Throughput (images/sec) | Memory (MiB) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | DP | FP32 | iResNet50 | v100 x 8 | 512 |  85742 | No | 1099.41 | 8681 |
 | DDP | FP32 | iResNet50 | v100 x 8 | 512 |  85742 | **Yes** | 1687.71 | 8137 |
@@ -107,7 +128,7 @@ Parallel training (Sec. 5.1 in [ArcFace](https://arxiv.org/pdf/1801.07698v3.pdf)
    - Generate features from a few samples by existing model and calculate their magnitudes.
    - Assume that magnitudes are distributed in `[x1, x2]`, then modify parameters to meet `l_a < x1, u_a > x2`.
    - In our scenario, we have a model trained by ArcFace which produces magnitudes around 1. `[l_a, u_a, l_m, u_m, l_g] =[1, 51, 0.45, 1, 5]` is a good choice.
-   - 
+   -
 ## Star History
 
 [![Star History Chart](https://api.star-history.com/svg?repos=IrvingMeng/MagFace&type=Date)](https://star-history.com/#IrvingMeng/MagFace&Date)
@@ -122,13 +143,13 @@ Parallel training (Sec. 5.1 in [ArcFace](https://arxiv.org/pdf/1801.07698v3.pdf)
 TODO list:
 
 - [x] add toy examples and release models
-- [x] migrate basic codes from the private codebase 
+- [x] migrate basic codes from the private codebase
 - [x] add beamer (after the ddl for iccv2021)
-- [x] test the basic codes 
+- [x] test the basic codes
 - [ ] add presentation
-- [x] migrate parallel training 
+- [x] migrate parallel training
 - [x] release mpu (Kaiyu Yue, in April) **renamed to torchshard**
-- [x] test parallel training 
+- [x] test parallel training
 - [x] add evaluation codes for recognition
 - [x] add evaluation codes for quality assessment
 - [x] add fp16
