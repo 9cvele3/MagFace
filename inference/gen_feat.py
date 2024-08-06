@@ -22,6 +22,7 @@ import warnings
 import time
 import pprint
 import os
+import matplotlib.pyplot as plt
 
 # parse the args
 cprint('=> parse the args ...', 'green')
@@ -71,7 +72,12 @@ class ImgInfLoader(data.Dataset):
         if img is None:
             raise Exception('{} is empty'.format(img_path))
             exit(1)
+
+        img = cv2.resize(img, (112, 112))
         _img = cv2.flip(img, 1)
+
+        #print(img)
+
         return [self.transform(img), self.transform(_img)], img_path
 
     def __len__(self):
@@ -92,6 +98,39 @@ def main_worker(ngpus_per_node, args):
     model = torch.nn.DataParallel(model)
     if not args.cpu_mode:
         model = model.cuda()
+
+    # Print all layers with their names, so we can use hooks later
+    #for name, layer in model.named_modules():
+    #    print(f"Layer name: {name}")
+
+    activations = {}
+
+    def get_activation(name):
+        def hook(model, input, output):
+            activations[name] = output.detach()
+        return hook
+
+    # Visualize the activations
+    def show_activation(act, title):
+        # Get the first channel of the activation
+        print(f"layer {title}, activation shape: {act.shape}")
+
+        if act.ndim > 2:
+            title = f"{title} {act.shape}"
+            act = act[0, 0].cpu()
+            plt.imshow(act, cmap='viridis')
+            plt.title(title)
+            plt.colorbar()
+            plt.show()
+
+    names = [
+    ]
+
+    for name, layer in model.named_modules():
+        if len(name) > 0:
+            print(f"Layer name: {name}")
+            layer.register_forward_hook(get_activation(name))
+            names.append(name)
 
     cprint('=> building the dataloader ...', 'green')
     trans = transforms.Compose([
@@ -134,6 +173,8 @@ def main_worker(ngpus_per_node, args):
             # measure data loading time
             data_time.update(time.time() - end)
 
+            #print(input[0])
+
             # compute output
             embedding_feat = model(input[0])
 
@@ -143,6 +184,10 @@ def main_worker(ngpus_per_node, args):
             # measure elapsed time
             batch_time.update(time.time() - end)
             end = time.time()
+
+            for name in names:
+                if name in activations:
+                    show_activation(activations[name], name)
 
             if i % args.print_freq == 0:
                 progress.display(i)
